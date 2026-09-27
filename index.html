@@ -532,7 +532,8 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/6.0.0/tesseract.min.js"></script>
-<script src="https://alcdn.msauth.net/browser/5.17.0/js/msal-browser.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<script>if(typeof msal==="undefined"){document.write('<script src="https://alcdn.msftauth.net/browser/2.35.0/js/msal-browser.min.js"><\/script>');}</script>
 <script>
 (function(){
   const root = document.getElementById('cdRoot');
@@ -1079,7 +1080,7 @@ After-Sales Team, SunLoop Energy`;
       auth: {
         clientId: MSAL_CLIENT_ID,
         authority: "https://login.microsoftonline.com/common",
-        redirectUri: window.location.origin + window.location.pathname
+        redirectUri: window.location.origin
       },
       cache: { cacheLocation: "sessionStorage" }
     });
@@ -1088,7 +1089,11 @@ After-Sales Team, SunLoop Energy`;
 
   if(!outlookConfigured()){
     els("outlookConnectBtn").disabled = true;
-    setOutlookStatus("Not set up yet — see the Outlook setup notes.", "err");
+    if(!MSAL_CLIENT_ID){
+      setOutlookStatus("Not set up yet — no client ID added.", "err");
+    } else {
+      setOutlookStatus("Microsoft sign-in library failed to load — check your internet/ad-blocker and refresh.", "err");
+    }
   }
 
   els("outlookConnectBtn").addEventListener("click", async ()=>{
@@ -1099,6 +1104,7 @@ After-Sales Team, SunLoop Energy`;
     const app = initMsal();
     setOutlookStatus("Signing in…");
     try{
+      if(typeof app.initialize === "function") await app.initialize();
       const result = await app.loginPopup({ scopes: ["Mail.Send"] });
       outlookAccount = result.account;
       els("outlookConnectBtn").style.display = "none";
