@@ -291,6 +291,23 @@
 }
 .cd-hint{font-size:11.5px;color:var(--ink-soft);margin-top:10px;line-height:1.5;}
 
+.cd-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.cd-field .cd-chip{position:relative;display:inline-block;margin-bottom:0;font-size:13px;color:var(--ink);cursor:pointer;}
+.cd-chip input{position:absolute;opacity:0;pointer-events:none;}
+.cd-chip span{
+  display:inline-block;
+  padding:7px 13px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  font-size:13px;
+  font-weight:500;
+  background:#fff;
+  color:var(--ink);
+  transition:background .12s,border-color .12s,color .12s;
+}
+.cd-chip input:checked + span{background:var(--trade);border-color:var(--trade);color:#fff;}
+.cd-chip input:focus-visible + span{outline:2px solid var(--ink);outline-offset:2px;}
+
 .cd-outlook-row{
   display:flex;
   align-items:center;
@@ -464,34 +481,36 @@
             <input type="text" id="emCustomerName" placeholder="John Smith">
           </div>
           <div class="cd-field">
-            <label>System installed</label>
-            <select id="emSystemType">
-              <option value="Heat Pump">Heat Pump</option>
-              <option value="Solar System">Solar System</option>
-              <option value="Battery Storage">Battery Storage</option>
-              <option value="Heating &amp; Cooling">Heating &amp; Cooling</option>
-              <option value="Air Conditioning">Air Conditioning</option>
-              <option value="EV Charger">EV Charger</option>
-              <option value="other">Other (type below)</option>
-            </select>
+            <label>Products purchased (tick all that apply)</label>
+            <div class="cd-chips" id="emProducts">
+              <label class="cd-chip"><input type="checkbox" value="solar"><span>Solar System</span></label>
+              <label class="cd-chip"><input type="checkbox" value="battery"><span>Battery Storage</span></label>
+              <label class="cd-chip"><input type="checkbox" value="heatpump" checked><span>Heat Pump</span></label>
+              <label class="cd-chip"><input type="checkbox" value="aircon"><span>Aircon System</span></label>
+              <label class="cd-chip"><input type="checkbox" value="ev"><span>EV Charger</span></label>
+            </div>
           </div>
-          <div class="cd-field" id="emSystemOtherField" style="display:none;">
-            <label>Custom system description</label>
-            <input type="text" id="emSystemOther" placeholder="e.g. Heat Pump &amp; Solar">
+          <div class="cd-field">
+            <label>Other product (optional — one item, e.g. Hot Water Heater)</label>
+            <input type="text" id="emSystemOther" placeholder="e.g. Hot Water Heater">
           </div>
           <div class="cd-field">
             <label>Your name (sign-off)</label>
             <input type="text" id="emYourName" placeholder="Alex">
           </div>
           <div class="cd-field">
-            <label>Customer email (optional — only used by the Gmail button)</label>
+            <label>Customer email (needed for Outlook send; also used by the Gmail button)</label>
             <input type="text" id="emCustomerEmail" placeholder="customer@example.com">
           </div>
         </div>
         <div class="cd-section">
           <h2>Message details</h2>
           <div class="cd-field">
-            <label>Subject line</label>
+            <label>Subject line — pick a ready-made one</label>
+            <select id="emSubjectPreset"></select>
+          </div>
+          <div class="cd-field">
+            <label>Subject line (edit if you like)</label>
             <input type="text" id="emSubject" value="How's your new Heat Pump working for you?">
           </div>
           <div class="cd-field">
@@ -578,7 +597,7 @@
               </div>
 
               <div style="margin-top:10px;font-size:12px;line-height:18px;color:#6B7280;">
-                Solar System &nbsp;|&nbsp; Battery Storage &nbsp;|&nbsp; Heat Pump &nbsp;|&nbsp; Heating &amp; Cooling &nbsp;|&nbsp; EV Charger
+                Solar System &nbsp;|&nbsp; Battery Storage &nbsp;|&nbsp; Heat Pump &nbsp;|&nbsp; Aircon System &nbsp;|&nbsp; EV Charger
               </div>
             </td>
           </tr>
@@ -593,7 +612,7 @@
               </p>
 
               <p style="margin:0 0 18px;font-size:16px;line-height:26px;">
-                We hope you're enjoying your new {{SYSTEM_TYPE}} and the comfort it has brought to your home.
+                We hope you're enjoying your new {{SYSTEM_TYPE}}{{ENJOY_TAIL}}.
               </p>
 
               <p style="margin:0 0 18px;font-size:16px;line-height:26px;">
@@ -641,8 +660,7 @@
               </table>
 
               <p style="margin:0 0 22px;font-size:16px;line-height:26px;">
-                Whether it's about our team's professionalism, the installation itself, or how your system
-                has been performing, every word helps us understand what we're doing well and where we can improve.
+                Whether it's about our team's professionalism, {{INSTALL_ITSELF}}, or {{PERFORMING}}, every word helps us understand what we're doing well and where we can improve.
               </p>
 
               <!-- Support -->
@@ -691,7 +709,7 @@
         </table>
 
         <div style="max-width:600px;padding:14px 15px 0;font-size:10px;line-height:16px;color:#6B7280;text-align:center;">
-          This email was sent by SunLoop Energy following your {{SYSTEM_TYPE}} installation.
+          This email was sent by SunLoop Energy following your {{SYSTEM_TYPE}} {{INSTALLATION}}.
         </div>
       </td>
     </tr>
@@ -891,19 +909,107 @@
       .replace(/"/g, "&quot;");
   }
 
-  function getEmailSystemType(){
-    const v = els("emSystemType").value;
-    if(v === "other") return els("emSystemOther").value.trim() || "system";
-    return v;
+  // ---------- Products & dynamic grammar ----------
+  // Chip order in the form matches this order, and lists are always joined
+  // in this order (not click order) so wording stays consistent.
+  const EMAIL_PRODUCTS = [
+    { key: "solar",    label: "Solar System",    benefit: "the savings it's generating for your home" },
+    { key: "battery",  label: "Battery Storage", benefit: "the energy security it's giving your home" },
+    { key: "heatpump", label: "Heat Pump",       benefit: "the comfort and lower running costs it has brought to your home" },
+    { key: "aircon",   label: "Aircon System",   benefit: "the year-round comfort it has brought to your home" },
+    { key: "ev",       label: "EV Charger",      benefit: "the convenience of charging at home" }
+  ];
+  const GENERIC_BENEFIT = "the difference it's making at home";
+
+  function joinList(items){
+    if(items.length <= 1) return items[0] || "";
+    if(items.length === 2) return items[0] + " and " + items[1];
+    return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
+  }
+
+  // Everything that changes with 1 product vs several lives here, so the
+  // email, plain text, WhatsApp and subject lines all agree with each other.
+  function getProductGrammar(){
+    const checked = new Set(
+      Array.from(document.querySelectorAll("#emProducts input:checked")).map(i => i.value)
+    );
+    const items = EMAIL_PRODUCTS
+      .filter(p => checked.has(p.key))
+      .map(p => ({ label: p.label, benefit: p.benefit }));
+    const other = els("emSystemOther").value.trim();
+    if(other) items.push({ label: other, benefit: GENERIC_BENEFIT });
+    if(items.length === 0) items.push({ label: "system", benefit: GENERIC_BENEFIT });
+
+    const plural = items.length > 1;
+    return {
+      list: joinList(items.map(i => i.label)),
+      plural,
+      is: plural ? "are" : "is",
+      installation: plural ? "installations" : "installation",
+      installItself: plural ? "the installations themselves" : "the installation itself",
+      enjoyTail: plural ? ", and the difference they're already making at home" : " and " + items[0].benefit,
+      performing: plural ? "how everything has been performing" : "how your " + items[0].label + " has been performing"
+    };
+  }
+
+  // First name for subject lines ("Sandy Spencer" -> "Sandy", "Mr Patel" stays "Mr Patel")
+  function getFirstName(){
+    const parts = els("emCustomerName").value.trim().split(/\s+/).filter(Boolean);
+    if(!parts.length) return "";
+    if(/^(mr|mrs|ms|miss|dr|mx)\.?$/i.test(parts[0]) && parts[1]) return parts[0] + " " + parts[1];
+    return parts[0];
+  }
+
+  // Ready-made subject lines. Deliberately no emojis, ALL CAPS, exclamation
+  // marks or "free"/"offer" wording — those are classic spam-filter triggers.
+  const SUBJECT_PRESETS = [
+    { id: "classic",  build: (g, n) => (g.plural ? "How are" : "How's") + " your new " + g.list + " working for you?" },
+    { id: "personal", build: (g, n) => (n ? n + ", " + (g.plural ? "how are" : "how's") : (g.plural ? "How are" : "How's")) + " your new " + g.list + " going?" },
+    { id: "loving",   build: (g, n) => "Loving your new " + g.list + (n ? ", " + n : "") + "?" },
+    { id: "hype",     build: (g, n) => (g.plural ? "Are" : "Is") + " your new " + g.list + " living up to the hype" + (n ? ", " + n : "") + "?" },
+    { id: "question", build: (g, n) => (n ? n + ", one" : "One") + " quick question about your new " + g.list },
+    { id: "favour",   build: (g, n) => "A small favour from a small team" + (n ? ", " + n : "") },
+    { id: "time",     build: (g, n) => "Got 2 minutes" + (n ? ", " + n : "") + "? We'd love your thoughts" },
+    { id: "trust",    build: (g, n) => "Did we do right by you" + (n ? ", " + n : "") + "?" },
+    { id: "thanks",   build: (g, n) => n ? "Thank you for choosing SunLoop, " + n : "Thank you for choosing SunLoop Energy" },
+    { id: "helps",    build: (g, n) => n ? n + ", your feedback helps our small team grow" : "Your feedback helps our small team grow" }
+  ];
+
+  // Rebuilds the dropdown with the *actual* subject lines for the current
+  // customer/products (so you pick by reading the real text), and — unless
+  // "Custom" is selected — writes the chosen one into the subject box.
+  function refreshSubjectOptions(){
+    const g = getProductGrammar();
+    const n = getFirstName();
+    const sel = els("emSubjectPreset");
+    const current = sel.value || "classic";
+    sel.innerHTML = "";
+    SUBJECT_PRESETS.forEach(p => {
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.build(g, n);
+      sel.appendChild(o);
+    });
+    const custom = document.createElement("option");
+    custom.value = "custom";
+    custom.textContent = "Custom — type your own below";
+    sel.appendChild(custom);
+    sel.value = current;
+    if(current !== "custom"){
+      const preset = SUBJECT_PRESETS.find(x => x.id === current) || SUBJECT_PRESETS[0];
+      els("emSubject").value = preset.build(g, n);
+    }
   }
 
   function getEmailFields(){
+    const g = getProductGrammar();
     return {
       customerName: els("emCustomerName").value.trim() || "[Customer Name]",
-      systemType: getEmailSystemType(),
+      g,
+      systemType: g.list,
       yourName: els("emYourName").value.trim() || "[Your Name]",
       reviewLink: els("emReviewLink").value.trim() || "https://g.page/r/CbhKJtsQu-_9EAI/review",
-      subject: els("emSubject").value.trim() || "How's your new SunLoop system working for you?",
+      subject: els("emSubject").value.trim() || SUBJECT_PRESETS[0].build(g, getFirstName()),
       customerEmail: els("emCustomerEmail").value.trim()
     };
   }
@@ -914,9 +1020,14 @@
 
   function buildEmailHtml(){
     const f = getEmailFields();
+    const g = f.g;
     return fillTemplate(EMAIL_TEMPLATE, {
       CUSTOMER_NAME: escapeHtml(f.customerName),
-      SYSTEM_TYPE: escapeHtml(f.systemType),
+      SYSTEM_TYPE: escapeHtml(g.list),
+      ENJOY_TAIL: escapeHtml(g.enjoyTail),
+      INSTALLATION: g.installation,
+      INSTALL_ITSELF: escapeHtml(g.installItself),
+      PERFORMING: escapeHtml(g.performing),
       YOUR_NAME: escapeHtml(f.yourName),
       REVIEW_LINK: escapeHtml(f.reviewLink)
     });
@@ -924,11 +1035,12 @@
 
   function buildEmailPlainText(){
     const f = getEmailFields();
+    const g = f.g;
     return `Subject: ${f.subject}
 
 Hi ${f.customerName},
 
-We hope you're enjoying your new ${f.systemType} and the comfort it has brought to your home.
+We hope you're enjoying your new ${g.list}${g.enjoyTail}.
 
 We're a growing, Melbourne-based team, and honest feedback from customers like you means a lot — it helps other homeowners feel confident choosing us, and it helps us keep raising the bar on service.
 
@@ -936,7 +1048,7 @@ As a small, growing team, every 5-star review means the world to us — if we ma
 
 👉 Leave us a review: ${f.reviewLink}
 
-Whether it's about our team's professionalism, the install itself, or how the system's performing since — every word helps.
+Whether it's about our team's professionalism, ${g.installItself}, or ${g.performing} — every word helps.
 
 Thank you for trusting SunLoop Energy with your home. If anything needs attention, just reply here and we'll sort it.
 
@@ -947,7 +1059,8 @@ After-Sales Team, SunLoop Energy`;
 
   function buildEmailWhatsapp(){
     const f = getEmailFields();
-    return `Hi ${f.customerName}! 👋 This is ${f.yourName} from SunLoop Energy. Hope your ${f.systemType} system is treating you well! As a small, growing team, a 5-star Google review would truly mean the world to us if we've earned it 🙏 👉 ${f.reviewLink} Thanks so much!`;
+    const g = f.g;
+    return `Hi ${f.customerName}! 👋 This is ${f.yourName} from SunLoop Energy. Hope your ${g.list} ${g.is} treating you well! As a small, growing team, a 5-star Google review would truly mean the world to us if we've earned it 🙏 👉 ${f.reviewLink} Thanks so much!`;
   }
 
   let emActiveTab = "html";
@@ -977,22 +1090,28 @@ After-Sales Team, SunLoop Energy`;
     setEmailTab(btn.dataset.tab);
   });
 
-  els("emSystemType").addEventListener("change", ()=>{
-    els("emSystemOtherField").style.display = els("emSystemType").value === "other" ? "" : "none";
-    els("emSubject").value = `How's your new ${getEmailSystemType()} working for you?`;
+  function refreshEmailAll(){
+    refreshSubjectOptions();
+    renderEmail();
+  }
+
+  // Anything that changes the grammar or the customer's first name also
+  // refreshes the subject options.
+  els("emProducts").addEventListener("change", refreshEmailAll);
+  els("emSystemOther").addEventListener("input", refreshEmailAll);
+  els("emCustomerName").addEventListener("input", refreshEmailAll);
+  els("emSubjectPreset").addEventListener("change", refreshEmailAll);
+
+  // Typing in the subject box switches the dropdown to "Custom" so your
+  // wording is never overwritten when products or the name change.
+  els("emSubject").addEventListener("input", ()=>{
+    els("emSubjectPreset").value = "custom";
     renderEmail();
   });
 
-  const emailFieldIds = ["emCustomerName","emSystemType","emSystemOther","emYourName","emCustomerEmail","emSubject","emReviewLink"];
-  emailFieldIds.forEach(id=>{
+  ["emYourName","emCustomerEmail","emReviewLink"].forEach(id=>{
     els(id).addEventListener("input", renderEmail);
     els(id).addEventListener("change", renderEmail);
-  });
-
-  els("emSystemOther").addEventListener("input", ()=>{
-    if(els("emSystemType").value === "other"){
-      els("emSubject").value = `How's your new ${getEmailSystemType()} working for you?`;
-    }
   });
 
   els("emCopyBtn").addEventListener("click", async ()=>{
@@ -1385,6 +1504,7 @@ After-Sales Team, SunLoop Energy`;
   setMode("certificate");
   setEmailTab("html");
   render();
+  refreshSubjectOptions();
   renderEmail();
 })();
 </script>
