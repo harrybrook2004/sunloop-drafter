@@ -50,15 +50,6 @@
   color:var(--ink-soft);
   font-size:13px;
 }
-.cd-ocr-badge{
-  font-size:11px;
-  font-weight:600;
-  padding:4px 9px;
-  border-radius:20px;
-  border:1px solid var(--line);
-  color:var(--ink-soft);
-  white-space:nowrap;
-}
 
 .cd-toggle{
   display:flex;
@@ -151,55 +142,6 @@
   letter-spacing:.4px;
 }
 
-.cd-photo{
-  margin-top:6px;
-  padding:10px;
-  border:1px dashed var(--line);
-  border-radius:var(--radius);
-  background:var(--plate-bg);
-}
-.cd-photo-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.cd-photo input[type=file]{font-size:12px;max-width:190px;}
-.cd-scan-btn{
-  font-family:'Inter',sans-serif;
-  font-size:12px;
-  font-weight:600;
-  padding:7px 12px;
-  border:1px solid var(--trade);
-  color:var(--trade);
-  background:#fff;
-  border-radius:var(--radius);
-  cursor:pointer;
-}
-.cd-scan-btn:hover{background:var(--trade-soft);}
-.cd-scan-btn:disabled{opacity:.5;cursor:default;}
-.cd-scan-status{font-size:11.5px;color:var(--ink-soft);margin-top:6px;min-height:14px;}
-.cd-scan-status.err{color:var(--danger);}
-.cd-scan-status.ok{color:#3E6B4A;}
-.cd-ocr-raw{
-  display:none;
-  margin-top:8px;
-  padding:8px 9px;
-  background:var(--plate-bg);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10.5px;
-  line-height:1.5;
-  color:var(--ink-soft);
-  max-height:110px;
-  overflow-y:auto;
-  white-space:pre-wrap;
-  word-break:break-word;
-}
-.cd-ocr-raw.show{display:block;}
-.cd-verify{
-  font-size:11px;
-  color:var(--danger);
-  margin-top:6px;
-  display:none;
-}
-.cd-verify.show{display:block;}
 
 .cd-preview-wrap{position:sticky;top:16px;}
 .cd-doc{
@@ -350,12 +292,12 @@
     <div class="cd-top">
       <div class="cd-brand">
         <h1>SunLoop Drafter</h1>
-        <span>certificates &amp; review-request emails, ready in seconds</span>
+        <span>certificates, review emails &amp; delivery messages, ready in seconds</span>
       </div>
-      <span class="cd-ocr-badge" id="ocrBadgeSlot">OCR: free local (Tesseract)</span>
       <div class="cd-toggle" id="modeToggle">
         <button data-mode="certificate" class="active">Certificate</button>
         <button data-mode="email">Review Email</button>
+        <button data-mode="delivery">Delivery</button>
       </div>
     </div>
 
@@ -390,14 +332,6 @@
             </select>
           </div>
           <div id="oldUnitBody">
-          <div class="cd-photo">
-            <div class="cd-photo-row">
-              <input type="file" accept="image/*" id="oldPhoto">
-              <button class="cd-scan-btn" id="oldScanBtn" type="button">Read from photo (free OCR)</button>
-            </div>
-            <div class="cd-scan-status" id="oldScanStatus"></div>
-            <pre class="cd-ocr-raw" id="oldScanRaw"></pre>
-          </div>
           <div class="cd-field" id="oldDescriptorPlumbing" style="margin-top:12px;">
             <label>Old system type</label>
             <select id="oldDescriptor">
@@ -429,20 +363,11 @@
           <div class="cd-field"><label>Brand</label><input type="text" id="oldBrand" placeholder="Aquamax"></div>
           <div class="cd-field cd-plate"><label>Model number (leave blank if unknown)</label><input type="text" id="oldModel" placeholder="G390SS-NG"></div>
           <div class="cd-field cd-plate"><label>Serial number (leave blank if unknown)</label><input type="text" id="oldSerial" placeholder="1060000-256837"></div>
-          <div class="cd-verify" id="oldVerify">⚠ OCR-extracted — check every character against the photo before this goes on a certificate.</div>
           </div>
         </div>
 
         <div class="cd-section">
           <h2 id="newUnitTitle">New unit installed</h2>
-          <div class="cd-photo">
-            <div class="cd-photo-row">
-              <input type="file" accept="image/*" id="newPhoto">
-              <button class="cd-scan-btn" id="newScanBtn" type="button">Read from photo (free OCR)</button>
-            </div>
-            <div class="cd-scan-status" id="newScanStatus"></div>
-            <pre class="cd-ocr-raw" id="newScanRaw"></pre>
-          </div>
           <div class="cd-row2" style="margin-top:12px;">
             <div class="cd-field"><label>Brand</label><input type="text" id="newBrand" placeholder="Neopower"></div>
             <div class="cd-field"><label>Quantity</label><input type="number" id="newQty" value="1" min="1"></div>
@@ -450,7 +375,6 @@
           <div class="cd-field"><label>Capacity (L)</label><input type="text" id="newCapacity" placeholder="270"></div>
           <div class="cd-field cd-plate"><label>Model number</label><input type="text" id="newModel" placeholder="NA44-270B"></div>
           <div class="cd-field cd-plate"><label>Serial number</label><input type="text" id="newSerial" placeholder="GHBS260727000481"></div>
-          <div class="cd-verify" id="newVerify">⚠ OCR-extracted — check every character against the photo before this goes on a certificate.</div>
         </div>
 
         <div class="cd-section">
@@ -552,10 +476,69 @@
 
     </div>
 
+    <!-- DELIVERY PANEL -->
+    <div class="cd-grid" id="deliveryPanel" style="display:none;">
+
+      <div class="cd-panel">
+        <div class="cd-section">
+          <h2>Delivery job</h2>
+          <div class="cd-row2">
+            <div class="cd-field"><label>Deliver on</label><input type="date" id="dvDate"></div>
+            <div class="cd-field"><label>Deliver before (optional)</label><input type="time" id="dvBy"></div>
+          </div>
+          <div class="cd-row2">
+            <div class="cd-field"><label>Installation date</label><input type="date" id="dvInstDate"></div>
+            <div class="cd-field"><label>Installation timing</label>
+              <select id="dvInstTime"><option value="">Not set</option><option>Morning</option><option>Afternoon</option><option>All day</option></select>
+            </div>
+          </div>
+          <div class="cd-field"><label>Invoice reference</label><input type="text" id="dvRef" placeholder="INV-00000"></div>
+        </div>
+        <div class="cd-section">
+          <h2>Pickup</h2>
+          <div class="cd-field"><label>Pickup address</label><input type="text" id="dvPickAddr"></div>
+          <div class="cd-row2">
+            <div class="cd-field"><label>Pickup contact</label><input type="text" id="dvPickName"></div>
+            <div class="cd-field"><label>Contact phone</label><input type="text" id="dvPickPhone"></div>
+          </div>
+        </div>
+        <div class="cd-section">
+          <h2>Delivery</h2>
+          <div class="cd-field"><label>Delivery address</label><textarea id="dvAddr" placeholder="1 Example Street&#10;Suburb VIC 3000"></textarea></div>
+          <div class="cd-row2">
+            <div class="cd-field"><label>Customer name</label><input type="text" id="dvCustName"></div>
+            <div class="cd-field"><label>Customer phone</label><input type="text" id="dvCustPhone" placeholder="0400 000 000"></div>
+          </div>
+        </div>
+        <div class="cd-section">
+          <h2>Units</h2>
+          <div class="cd-row2">
+            <div class="cd-field cd-plate"><label>Outdoor unit model</label><input type="text" id="dvOutdoor"></div>
+            <div class="cd-field cd-plate"><label>Indoor unit model</label><input type="text" id="dvIndoor"></div>
+          </div>
+        </div>
+        <div class="cd-section">
+          <h2>Extra</h2>
+          <div class="cd-field"><label>Note for the driver (optional)</label><textarea id="dvNote"></textarea></div>
+          <div class="cd-chips"><label class="cd-chip"><input type="checkbox" id="dvEarly" checked><span>Ask for earliest possible delivery</span></label></div>
+        </div>
+      </div>
+
+      <div class="cd-preview-wrap">
+        <pre class="cd-email-text" id="dvPreview"></pre>
+        <div class="cd-actions">
+          <button class="cd-btn-primary" id="dvCopyBtn">Copy message</button>
+          <button class="cd-btn-ghost" id="dvWaBtn">Open in WhatsApp</button>
+          <button class="cd-btn-ghost" id="dvClearBtn">Clear form</button>
+          <span class="cd-copied" id="dvCopiedMsg">Copied</span>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/6.0.0/tesseract.min.js"></script>
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <script>if(typeof msal==="undefined"){document.write('<script src="https://alcdn.msftauth.net/browser/2.35.0/js/msal-browser.min.js"><\/script>');}</script>
 <script>
@@ -873,9 +856,8 @@
     document.querySelectorAll('#modeToggle button').forEach(b=>{
       b.classList.toggle('active', b.dataset.mode === mode);
     });
-    els("certificatePanel").style.display = mode === "certificate" ? "" : "none";
-    els("emailPanel").style.display = mode === "email" ? "" : "none";
-    els("ocrBadgeSlot").style.display = mode === "certificate" ? "" : "none";
+    const panels = {certificate:"certificatePanel", email:"emailPanel", delivery:"deliveryPanel"};
+    Object.keys(panels).forEach(m=>{ els(panels[m]).style.display = m === mode ? "" : "none"; });
   }
 
   document.getElementById("modeToggle").addEventListener("click", e=>{
@@ -1287,222 +1269,117 @@ After-Sales Team, SunLoop Energy`;
 
   // ================= END EMAIL DRAFTING =================
 
-  // --- photo scanning via on-device OCR (Tesseract.js, free, no server, no key) ---
+  // ================= DELIVERY MESSAGE (WhatsApp) =================
+  // Edit these defaults if the usual pickup point changes.
+  const DELIVERY_DEFAULTS = {
+    pickAddr: "4 Ravenhall Way, Ravenhall VIC 3023",
+    pickName: "Shushant",
+    pickPhone: "0401 608 234"
+  };
+  const DV_TEXT_IDS = ["dvRef","dvPickAddr","dvPickName","dvPickPhone","dvAddr","dvCustName","dvCustPhone","dvOutdoor","dvIndoor","dvNote"];
+  const DV_ALL_IDS = DV_TEXT_IDS.concat(["dvDate","dvBy","dvInstDate","dvInstTime","dvEarly"]);
+  const DV_DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const DV_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  let dvInstTouched = false;
 
-  // Multi-stage preprocessing aimed at small, stamped, or glare-affected data
-  // plate text:
-  //  1) upscale toward a target resolution (small fonts need more pixels)
-  //  2) grayscale
-  //  3) flatten uneven lighting (cheap large-radius "blur" via down/upscale,
-  //     used as a local background estimate, then normalized out)
-  //  4) light sharpen (unsharp-mask style, same down/upscale trick for the blur)
-  //  5) Otsu binarization — picks the best black/white cutoff automatically
-  //     instead of a fixed threshold, which holds up much better across
-  //     differently-lit photos
-  function preprocessImage(file){
-    return new Promise((resolve, reject)=>{
-      const reader = new FileReader();
-      reader.onload = (e)=>{
-        const img = new Image();
-        img.onload = ()=>{
-          try{
-            const longEdge = Math.max(img.width, img.height);
-            let scale = 2400 / longEdge;
-            scale = Math.max(1, Math.min(scale, 4));
-            const W = Math.round(img.width * scale);
-            const H = Math.round(img.height * scale);
-
-            const canvas = document.createElement("canvas");
-            canvas.width = W; canvas.height = H;
-            const ctx = canvas.getContext("2d");
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = "high";
-            ctx.drawImage(img, 0, 0, W, H);
-
-            // grayscale
-            let imgData = ctx.getImageData(0, 0, W, H);
-            let d = imgData.data;
-            for(let i = 0; i < d.length; i += 4){
-              const g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-              d[i] = d[i+1] = d[i+2] = g;
-            }
-            ctx.putImageData(imgData, 0, 0);
-
-            const cheapBlur = (srcCanvas, factor) => {
-              const sw = Math.max(1, Math.round(W / factor));
-              const sh = Math.max(1, Math.round(H / factor));
-              const small = document.createElement("canvas");
-              small.width = sw; small.height = sh;
-              const sctx = small.getContext("2d");
-              sctx.imageSmoothingEnabled = true;
-              sctx.imageSmoothingQuality = "high";
-              sctx.drawImage(srcCanvas, 0, 0, sw, sh);
-              const up = document.createElement("canvas");
-              up.width = W; up.height = H;
-              const uctx = up.getContext("2d");
-              uctx.imageSmoothingEnabled = true;
-              uctx.imageSmoothingQuality = "high";
-              uctx.drawImage(small, 0, 0, W, H);
-              return uctx.getImageData(0, 0, W, H).data;
-            };
-
-            // flatten uneven lighting / glare using a heavy blur as the
-            // background estimate
-            const bg = cheapBlur(canvas, 30);
-            imgData = ctx.getImageData(0, 0, W, H);
-            d = imgData.data;
-            for(let i = 0; i < d.length; i += 4){
-              let v = 128 + (d[i] - bg[i]) * 2.2;
-              v = Math.max(0, Math.min(255, v));
-              d[i] = d[i+1] = d[i+2] = v;
-            }
-            ctx.putImageData(imgData, 0, 0);
-
-            // light sharpen
-            const blur = cheapBlur(canvas, 3);
-            imgData = ctx.getImageData(0, 0, W, H);
-            d = imgData.data;
-            for(let i = 0; i < d.length; i += 4){
-              let v = d[i] + (d[i] - blur[i]) * 0.6;
-              v = Math.max(0, Math.min(255, v));
-              d[i] = d[i+1] = d[i+2] = v;
-            }
-            ctx.putImageData(imgData, 0, 0);
-
-            // Otsu binarization
-            imgData = ctx.getImageData(0, 0, W, H);
-            d = imgData.data;
-            const hist = new Array(256).fill(0);
-            for(let i = 0; i < d.length; i += 4) hist[Math.round(d[i])]++;
-            const total = W * H;
-            let sum = 0;
-            for(let t = 0; t < 256; t++) sum += t * hist[t];
-            let sumB = 0, wB = 0, varMax = 0, threshold = 128;
-            for(let t = 0; t < 256; t++){
-              wB += hist[t];
-              if(wB === 0) continue;
-              const wF = total - wB;
-              if(wF === 0) break;
-              sumB += t * hist[t];
-              const mB = sumB / wB, mF = (sum - sumB) / wF;
-              const between = wB * wF * (mB - mF) * (mB - mF);
-              if(between > varMax){ varMax = between; threshold = t; }
-            }
-            for(let i = 0; i < d.length; i += 4){
-              const v = d[i] > threshold ? 255 : 0;
-              d[i] = d[i+1] = d[i+2] = v;
-            }
-            ctx.putImageData(imgData, 0, 0);
-
-            resolve(canvas.toDataURL("image/png"));
-          } catch(err){ reject(err); }
-        };
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  function isoPlusDays(n){
+    const d = new Date(); d.setDate(d.getDate()+n);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
   }
-
-  // Pull model/serial out of raw OCR text by matching the labels nearly every
-  // data plate uses. Anything it can't confidently match is left for the
-  // raw-text box so the tech can read it themselves.
-  function parseNameplate(text){
-    const flat = text.replace(/\s+/g, " ");
-    const result = {model:"", serial:""};
-    const modelRe = /model\s*(no\.?|number|#)?\s*[:\-]?\s*([A-Za-z0-9][A-Za-z0-9\-\/\.]{2,24})/i;
-    const serialRe = /(s\/?n|serial\s*(no\.?|number)?)\s*[:\-]?\s*([A-Za-z0-9][A-Za-z0-9\-\/\.]{3,24})/i;
-    const m = flat.match(modelRe);
-    if(m) result.model = m[2].trim();
-    const s = flat.match(serialRe);
-    if(s) result.serial = s[3].trim();
-    return result;
+  function dvFmtDate(iso){
+    if(!iso) return "";
+    const [y,m,d] = iso.split("-").map(Number);
+    const dt = new Date(y,m-1,d);
+    let out = `${DV_DAYS[dt.getDay()]} ${d} ${DV_MONTHS[m-1]}`;
+    if(iso === isoPlusDays(0)) out += " (Today)";
+    else if(iso === isoPlusDays(1)) out += " (Tomorrow)";
+    return out;
   }
+  function dvFmtTime(t){
+    if(!t) return "";
+    let [h,m] = t.split(":").map(Number);
+    const ap = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    return m ? `${h}:${String(m).padStart(2,"0")} ${ap}` : `${h} ${ap}`;
+  }
+  function dvVal(id){ return els(id).value.trim(); }
 
-  let tesseractWorker = null;
-  async function getWorker(){
-    if(!tesseractWorker){
-      tesseractWorker = await Tesseract.createWorker("eng");
+  function buildDeliveryMessage(){
+    const L = [];
+    const by = dvFmtTime(dvVal("dvBy"));
+    const date = dvFmtDate(dvVal("dvDate"));
+    L.push("*NEW JOB – DELIVERY*");
+    if(date || by) L.push("Deliver by: " + [date, by ? "before " + by : ""].filter(Boolean).join(", "));
+
+    const pn = dvVal("dvPickName"), pp = dvVal("dvPickPhone"), pa = dvVal("dvPickAddr");
+    L.push("", "*Pickup*");
+    if(pa) L.push(pa);
+    if(pn || pp) L.push("Contact: " + [pn, pp].filter(Boolean).join(" – "));
+    L.push("📞 Please call" + (pn ? " " + pn : "") + " before picking up stock.");
+
+    const da = dvVal("dvAddr").split(/\n+/).map(x=>x.trim()).filter(Boolean).join(", ");
+    const cn = dvVal("dvCustName"), cp = dvVal("dvCustPhone");
+    L.push("", "*Delivery*");
+    if(da) L.push(da);
+    if(cn || cp) L.push("Customer: " + [cn, cp].filter(Boolean).join(" – "));
+    L.push("📞 Please call the customer before delivery.");
+
+    const out = dvVal("dvOutdoor"), ind = dvVal("dvIndoor");
+    if(out || ind){
+      L.push("", "*Units*");
+      if(out) L.push("Outdoor: " + out);
+      if(ind) L.push("Indoor: " + ind);
     }
-    return tesseractWorker;
+
+    const ref = dvVal("dvRef");
+    const instDate = dvFmtDate(dvVal("dvInstDate")), instTime = dvVal("dvInstTime");
+    if(ref || instDate || instTime) L.push("");
+    if(ref) L.push("*Ref:* " + ref);
+    if(instDate || instTime) L.push("*Installation:* " + [instDate, instTime.toLowerCase()].filter(Boolean).join(", "));
+
+    const note = dvVal("dvNote");
+    if(note) L.push("", note);
+    if(els("dvEarly").checked) L.push("", "Please deliver as early as possible.");
+    return L.join("\n");
   }
 
-  async function scanViaTesseract(prefix){
-    const fileInput = els(prefix + "Photo");
-    const statusEl = els(prefix + "ScanStatus");
-    const verifyEl = els(prefix + "Verify");
-    const rawEl = els(prefix + "ScanRaw");
-    const file = fileInput.files[0];
-    if(!file){
-      statusEl.textContent = "Choose a photo of the data plate first.";
-      statusEl.className = "cd-scan-status err";
-      return;
-    }
-    rawEl.classList.remove("show");
-    statusEl.textContent = "Sharpening image…";
-    statusEl.className = "cd-scan-status";
-    try{
-      const processed = await preprocessImage(file);
-      const worker = await getWorker();
+  function renderDelivery(){ els("dvPreview").textContent = buildDeliveryMessage(); }
 
-      statusEl.textContent = "Reading data plate…";
-      await worker.setParameters({ tessedit_pageseg_mode: "6" }); // uniform block of text
-      let { data: { text } } = await worker.recognize(processed);
-      let parsed = parseNameplate(text);
-
-      if(!parsed.model && !parsed.serial){
-        statusEl.textContent = "Trying a different reading mode…";
-        await worker.setParameters({ tessedit_pageseg_mode: "11" }); // sparse text
-        const retry = await worker.recognize(processed);
-        const retryParsed = parseNameplate(retry.data.text);
-        if(retryParsed.model || retryParsed.serial){
-          text = retry.data.text;
-          parsed = retryParsed;
-        } else if(retry.data.text.trim().length > text.trim().length){
-          text = retry.data.text; // keep whichever pass read more, for the raw box
-        }
-      }
-
-      if(parsed.model) els(prefix + "Model").value = parsed.model;
-      if(parsed.serial) els(prefix + "Serial").value = parsed.serial;
-
-      rawEl.textContent = text.trim() || "(no legible text found)";
-      rawEl.classList.add("show");
-
-      const gotAny = parsed.model || parsed.serial;
-      statusEl.textContent = gotAny
-        ? "Read from photo (free OCR) — verify before using."
-        : "Couldn't confidently pick out model/serial — check the raw text below and fill manually.";
-      statusEl.className = gotAny ? "cd-scan-status ok" : "cd-scan-status err";
-      verifyEl.classList.add("show");
-      render();
-    } catch(err){
-      statusEl.textContent = "Couldn't read this photo. Try a closer, better-lit, less angled shot.";
-      statusEl.className = "cd-scan-status err";
-    }
+  function resetDelivery(){
+    DV_TEXT_IDS.forEach(id=>{ els(id).value = ""; });
+    els("dvPickAddr").value = DELIVERY_DEFAULTS.pickAddr;
+    els("dvPickName").value = DELIVERY_DEFAULTS.pickName;
+    els("dvPickPhone").value = DELIVERY_DEFAULTS.pickPhone;
+    els("dvDate").value = isoPlusDays(1);
+    els("dvInstDate").value = isoPlusDays(1);
+    els("dvBy").value = "08:00";
+    els("dvInstTime").value = "";
+    els("dvEarly").checked = true;
+    dvInstTouched = false;
+    renderDelivery();
   }
 
-  // Downscale for the proxy path only — Claude's vision doesn't need the
-  // heavy binarization Tesseract needs, just a reasonably sized image so the
-  // upload is fast and the token cost stays low.
-  async function scan(prefix){
-    const btn = els(prefix + "ScanBtn");
-    btn.disabled = true;
-    try{
-      await scanViaTesseract(prefix);
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  els("oldScanBtn").addEventListener("click", ()=>scan("old"));
-  els("newScanBtn").addEventListener("click", ()=>scan("new"));
-
-  // clear the "verify" warning if the tech edits the field by hand
-  ["oldBrand","oldModel","oldSerial"].forEach(id=>{
-    els(id).addEventListener("input", ()=>{});
+  DV_ALL_IDS.forEach(id=>{
+    els(id).addEventListener("input", renderDelivery);
+    els(id).addEventListener("change", renderDelivery);
   });
+  els("dvInstDate").addEventListener("input", ()=>{ dvInstTouched = true; });
+  els("dvDate").addEventListener("input", ()=>{
+    if(!dvInstTouched){ els("dvInstDate").value = els("dvDate").value; renderDelivery(); }
+  });
+  els("dvCopyBtn").addEventListener("click", ()=>{
+    navigator.clipboard.writeText(buildDeliveryMessage()).then(()=>{
+      const msg = els("dvCopiedMsg");
+      msg.classList.add("show");
+      setTimeout(()=>msg.classList.remove("show"), 1500);
+    });
+  });
+  els("dvWaBtn").addEventListener("click", ()=>{
+    window.open("https://wa.me/?text=" + encodeURIComponent(buildDeliveryMessage()), "_blank", "noopener");
+  });
+  els("dvClearBtn").addEventListener("click", resetDelivery);
+
+  // ================= END DELIVERY MESSAGE =================
 
   toggleOldUnitVisibility();
   initCertificateForm();
@@ -1511,5 +1388,6 @@ After-Sales Team, SunLoop Energy`;
   render();
   refreshSubjectOptions();
   renderEmail();
+  resetDelivery();
 })();
 </script>
