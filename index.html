@@ -496,30 +496,30 @@
         </div>
         <div class="cd-section">
           <h2>Pickup</h2>
-          <div class="cd-field"><label>Pickup address</label><input type="text" id="dvPickAddr"></div>
+          <div class="cd-field"><label>Pickup address</label><input type="text" id="dvPickAddr" placeholder="1 Example Way, Suburb VIC 3000"></div>
           <div class="cd-row2">
-            <div class="cd-field"><label>Pickup contact</label><input type="text" id="dvPickName"></div>
-            <div class="cd-field"><label>Contact phone</label><input type="text" id="dvPickPhone"></div>
+            <div class="cd-field"><label>Pickup contact</label><input type="text" id="dvPickName" placeholder="Name"></div>
+            <div class="cd-field"><label>Contact phone</label><input type="text" id="dvPickPhone" placeholder="0400 000 000"></div>
           </div>
         </div>
         <div class="cd-section">
           <h2>Delivery</h2>
           <div class="cd-field"><label>Delivery address</label><textarea id="dvAddr" placeholder="1 Example Street&#10;Suburb VIC 3000"></textarea></div>
           <div class="cd-row2">
-            <div class="cd-field"><label>Customer name</label><input type="text" id="dvCustName"></div>
+            <div class="cd-field"><label>Customer name</label><input type="text" id="dvCustName" placeholder="Customer name"></div>
             <div class="cd-field"><label>Customer phone</label><input type="text" id="dvCustPhone" placeholder="0400 000 000"></div>
           </div>
         </div>
         <div class="cd-section">
           <h2>Units</h2>
           <div class="cd-row2">
-            <div class="cd-field cd-plate"><label>Outdoor unit model</label><input type="text" id="dvOutdoor"></div>
-            <div class="cd-field cd-plate"><label>Indoor unit model</label><input type="text" id="dvIndoor"></div>
+            <div class="cd-field cd-plate"><label>Outdoor unit model</label><input type="text" id="dvOutdoor" placeholder="Outdoor model number"></div>
+            <div class="cd-field cd-plate"><label>Indoor unit model</label><input type="text" id="dvIndoor" placeholder="Indoor model number"></div>
           </div>
         </div>
         <div class="cd-section">
           <h2>Extra</h2>
-          <div class="cd-field"><label>Note for the driver (optional)</label><textarea id="dvNote"></textarea></div>
+          <div class="cd-field"><label>Note for the driver (optional)</label><textarea id="dvNote" placeholder="e.g. Gate code, access notes"></textarea></div>
           <div class="cd-chips"><label class="cd-chip"><input type="checkbox" id="dvEarly" checked><span>Ask for earliest possible delivery</span></label></div>
         </div>
       </div>
@@ -1270,12 +1270,6 @@ After-Sales Team, SunLoop Energy`;
   // ================= END EMAIL DRAFTING =================
 
   // ================= DELIVERY MESSAGE (WhatsApp) =================
-  // Edit these defaults if the usual pickup point changes.
-  const DELIVERY_DEFAULTS = {
-    pickAddr: "4 Ravenhall Way, Ravenhall VIC 3023",
-    pickName: "Shushant",
-    pickPhone: "0401 608 234"
-  };
   const DV_TEXT_IDS = ["dvRef","dvPickAddr","dvPickName","dvPickPhone","dvAddr","dvCustName","dvCustPhone","dvOutdoor","dvIndoor","dvNote"];
   const DV_ALL_IDS = DV_TEXT_IDS.concat(["dvDate","dvBy","dvInstDate","dvInstTime","dvEarly"]);
   const DV_DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -1315,7 +1309,7 @@ After-Sales Team, SunLoop Energy`;
     L.push("", "PICKUP");
     if(pa) L.push(pa);
     if(pn || pp) L.push("Contact: " + [pn, pp].filter(Boolean).join(" – "));
-    L.push("Please call" + (pn ? " " + pn : "") + " before picking up stock.");
+    L.push("Please call " + (pn || "the pickup contact") + " before picking up stock.");
 
     const da = dvVal("dvAddr").split(/\n+/).map(x=>x.trim()).filter(Boolean).join(", ");
     const cn = dvVal("dvCustName"), cp = dvVal("dvCustPhone");
@@ -1347,9 +1341,6 @@ After-Sales Team, SunLoop Energy`;
 
   function resetDelivery(){
     DV_TEXT_IDS.forEach(id=>{ els(id).value = ""; });
-    els("dvPickAddr").value = DELIVERY_DEFAULTS.pickAddr;
-    els("dvPickName").value = DELIVERY_DEFAULTS.pickName;
-    els("dvPickPhone").value = DELIVERY_DEFAULTS.pickPhone;
     els("dvDate").value = isoPlusDays(1);
     els("dvInstDate").value = isoPlusDays(1);
     els("dvBy").value = "08:00";
