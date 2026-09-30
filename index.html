@@ -1308,25 +1308,25 @@ After-Sales Team, SunLoop Energy`;
     const L = [];
     const by = dvFmtTime(dvVal("dvBy"));
     const date = dvFmtDate(dvVal("dvDate"));
-    L.push("*NEW JOB – DELIVERY*");
+    L.push("NEW JOB – DELIVERY");
     if(date || by) L.push("Deliver by: " + [date, by ? "before " + by : ""].filter(Boolean).join(", "));
 
     const pn = dvVal("dvPickName"), pp = dvVal("dvPickPhone"), pa = dvVal("dvPickAddr");
-    L.push("", "*Pickup*");
+    L.push("", "PICKUP");
     if(pa) L.push(pa);
     if(pn || pp) L.push("Contact: " + [pn, pp].filter(Boolean).join(" – "));
-    L.push("📞 Please call" + (pn ? " " + pn : "") + " before picking up stock.");
+    L.push("Please call" + (pn ? " " + pn : "") + " before picking up stock.");
 
     const da = dvVal("dvAddr").split(/\n+/).map(x=>x.trim()).filter(Boolean).join(", ");
     const cn = dvVal("dvCustName"), cp = dvVal("dvCustPhone");
-    L.push("", "*Delivery*");
+    L.push("", "DELIVERY");
     if(da) L.push(da);
     if(cn || cp) L.push("Customer: " + [cn, cp].filter(Boolean).join(" – "));
-    L.push("📞 Please call the customer before delivery.");
+    L.push("Please call the customer before delivery.");
 
     const out = dvVal("dvOutdoor"), ind = dvVal("dvIndoor");
     if(out || ind){
-      L.push("", "*Units*");
+      L.push("", "UNITS");
       if(out) L.push("Outdoor: " + out);
       if(ind) L.push("Indoor: " + ind);
     }
@@ -1334,8 +1334,8 @@ After-Sales Team, SunLoop Energy`;
     const ref = dvVal("dvRef");
     const instDate = dvFmtDate(dvVal("dvInstDate")), instTime = dvVal("dvInstTime");
     if(ref || instDate || instTime) L.push("");
-    if(ref) L.push("*Ref:* " + ref);
-    if(instDate || instTime) L.push("*Installation:* " + [instDate, instTime.toLowerCase()].filter(Boolean).join(", "));
+    if(ref) L.push("Ref: " + ref);
+    if(instDate || instTime) L.push("Installation: " + [instDate, instTime.toLowerCase()].filter(Boolean).join(", "));
 
     const note = dvVal("dvNote");
     if(note) L.push("", note);
